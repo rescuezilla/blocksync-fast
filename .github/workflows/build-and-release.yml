@@ -60,7 +60,30 @@ jobs:
       run: |
         autoreconf --install
         ./configure
-    
+
+    - name: Get version and architecture info and set env variables
+      id: version
+      run: |
+        # Get git describe for version info
+        GIT_DESCRIBE=$(git describe --tags --long --dirty)
+        echo "git_describe=$GIT_DESCRIBE" >> $GITHUB_OUTPUT
+
+        # Get commit hash
+        COMMIT_HASH=$(git rev-parse HEAD)
+        echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+
+        # Get system architecture
+        ARCH=$(uname -m)
+        echo "arch=$ARCH" >> $GITHUB_OUTPUT
+
+        # Get OS info
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        echo "os=$OS" >> $GITHUB_OUTPUT
+
+        # Create target filename
+        TARGET_FILENAME="blocksync-fast-$OS-$ARCH"
+        echo "target_filename=$TARGET_FILENAME" >> $GITHUB_OUTPUT
+
     - name: Build binary
       run: |
         make
@@ -79,28 +102,6 @@ jobs:
         # Copy the deb package to release directory
         cp ../blocksync-fast_*.deb release/ || true
     
-    - name: Get version and architecture info
-      id: version
-      run: |
-        # Get git describe for version info
-        GIT_DESCRIBE=$(git describe --tags --long --dirty)
-        echo "git_describe=$GIT_DESCRIBE" >> $GITHUB_OUTPUT
-        
-        # Get commit hash
-        COMMIT_HASH=$(git rev-parse HEAD)
-        echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
-        
-        # Get system architecture
-        ARCH=$(uname -m)
-        echo "arch=$ARCH" >> $GITHUB_OUTPUT
-        
-        # Get OS info
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        echo "os=$OS" >> $GITHUB_OUTPUT
-        
-        # Create target filename
-        TARGET_FILENAME="blocksync-fast-$OS-$ARCH"
-        echo "target_filename=$TARGET_FILENAME" >> $GITHUB_OUTPUT
     
     - name: Create release (on tag push)
       uses: softprops/action-gh-release@v1
