@@ -127,10 +127,12 @@ jobs:
     # workflow run. The latter is associated with only a pushed tag.
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
+      # If there's an error due to eg, the user's artifact storage quota limits, that's not a big issue.
+      continue-on-error: true
       with:
         name: blocksync-fast-${{ steps.version.outputs.git_describe }}-${{ steps.version.outputs.target_filename }}
         path: |
           release/${{ steps.version.outputs.target_filename }}
           release/blocksync-fast_*.deb
-        retention-days: 30
+        retention-days: 5
  
